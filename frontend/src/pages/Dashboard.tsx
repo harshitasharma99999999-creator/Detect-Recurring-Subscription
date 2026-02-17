@@ -1,29 +1,35 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import type { Subscription } from '../types';
+import type { Subscription, Card } from '../types';
 import type { AnalyzeResult } from '../types';
 import { UploadZone } from '../components/UploadZone';
 import { SubscriptionList } from '../components/SubscriptionList';
 import { UpcomingCharges } from '../components/UpcomingCharges';
 import { SpendingChart } from '../components/SpendingChart';
+import { CardsSection, NO_CARD_ID } from '../components/CardsSection';
 
 export function Dashboard() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [upcoming, setUpcoming] = useState<Subscription[]>([]);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [selectedCardId, setSelectedCardId] = useState(NO_CARD_ID);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const refresh = async () => {
     try {
-      const [list, up] = await Promise.all([
+      const [list, up, cardsList] = await Promise.all([
         api.subscriptions.list(),
         api.subscriptions.upcoming(),
+        api.cards.list(),
       ]);
       setSubscriptions(Array.isArray(list) ? list : []);
       setUpcoming(Array.isArray(up) ? up : []);
+      setCards(Array.isArray(cardsList) ? cardsList : []);
     } catch {
       setSubscriptions([]);
       setUpcoming([]);
+      setCards([]);
     } finally {
       setLoading(false);
     }
@@ -50,9 +56,17 @@ export function Dashboard() {
         <p className="text-gray-400 mt-0.5">Upload a CSV to detect recurring subscriptions</p>
       </div>
 
+      <CardsSection
+        cards={cards}
+        onUpdate={refresh}
+        selectedCardId={selectedCardId}
+        onSelectCard={setSelectedCardId}
+      />
+
       <UploadZone
         onAnalyzed={handleAnalyzed}
         onError={(text) => setMessage({ type: 'error', text })}
+        selectedCardId={selectedCardId}
       />
 
       {message && (
@@ -102,6 +116,7 @@ export function Dashboard() {
             <SubscriptionList
               subscriptions={subscriptions}
               upcoming={upcoming}
+              cards={cards}
               onUpdate={refresh}
             />
           </section>

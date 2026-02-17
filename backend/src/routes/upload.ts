@@ -6,6 +6,7 @@ import {
   type ParsedTransaction,
   type DetectedSubscription,
 } from '../subscriptionDetector.js';
+import { NO_CARD_ID } from './cards.js';
 
 export const uploadRouter = Router();
 
@@ -21,8 +22,9 @@ function requireAuth(req: import('express').Request, res: import('express').Resp
 
 uploadRouter.post('/analyze', requireAuth, async (req, res) => {
   try {
-    const { csv_content } = req.body;
+    const { csv_content, card_id } = req.body;
     const token = (req as any).accessToken;
+    const subscriptionCardId = card_id && typeof card_id === 'string' ? card_id : NO_CARD_ID;
 
     if (!csv_content || typeof csv_content !== 'string') {
       return res.status(400).json({ error: 'Missing csv_content' });
@@ -48,6 +50,7 @@ uploadRouter.post('/analyze', requireAuth, async (req, res) => {
 
     const toInsert = detected.map((d) => ({
       user_id: user.id,
+      card_id: subscriptionCardId,
       merchant_name: d.merchantName,
       normalized_merchant: d.normalizedMerchant,
       amount: d.amount,
@@ -62,7 +65,7 @@ uploadRouter.post('/analyze', requireAuth, async (req, res) => {
 
     if (toInsert.length > 0) {
       const { error: insertError } = await supabaseAdmin.from('subscriptions').upsert(toInsert, {
-        onConflict: 'user_id,normalized_merchant',
+        onConflict: 'user_id,normalized_merchant,card_id',
         ignoreDuplicates: false,
       });
       if (insertError) console.error('Subscription insert error:', insertError);

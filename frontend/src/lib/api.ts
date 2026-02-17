@@ -26,6 +26,15 @@ export async function apiFetch(path: string, opts: RequestInit = {}) {
 }
 
 export const api = {
+  cards: {
+    list: () => apiFetch('/api/cards'),
+    create: (last_four: string, cardholder_name: string, nickname?: string) =>
+      apiFetch('/api/cards', {
+        method: 'POST',
+        body: JSON.stringify({ last_four, cardholder_name, nickname }),
+      }),
+    delete: (id: string) => apiFetch(`/api/cards/${id}`, { method: 'DELETE' }),
+  },
   auth: {
     session: (accessToken: string) =>
       fetch(`${API}/api/auth/session`, {
@@ -35,7 +44,11 @@ export const api = {
       }).then((r) => (r.ok ? r.json() : Promise.reject(new Error('Invalid session')))),
   },
   upload: {
-    analyze: (csvContent: string) => apiFetch('/api/upload/analyze', { method: 'POST', body: JSON.stringify({ csv_content: csvContent }) }),
+    analyze: (csvContent: string, cardId?: string) =>
+      apiFetch('/api/upload/analyze', {
+        method: 'POST',
+        body: JSON.stringify({ csv_content: csvContent, card_id: cardId || undefined }),
+      }),
   },
   subscriptions: {
     list: () => apiFetch('/api/subscriptions'),

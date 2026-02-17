@@ -5,9 +5,10 @@ import type { AnalyzeResult } from '../types';
 interface UploadZoneProps {
   onAnalyzed: (result: AnalyzeResult) => void;
   onError: (msg: string) => void;
+  selectedCardId?: string;
 }
 
-export function UploadZone({ onAnalyzed, onError }: UploadZoneProps) {
+export function UploadZone({ onAnalyzed, onError, selectedCardId }: UploadZoneProps) {
   const [dragging, setDragging] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -18,7 +19,7 @@ export function UploadZone({ onAnalyzed, onError }: UploadZoneProps) {
       setProgress(10);
       try {
         setProgress(40);
-        const result = await api.upload.analyze(content);
+        const result = await api.upload.analyze(content, selectedCardId && selectedCardId !== '00000000-0000-0000-0000-000000000000' ? selectedCardId : undefined);
         setProgress(100);
         onAnalyzed(result as AnalyzeResult);
       } catch (err) {
@@ -28,7 +29,7 @@ export function UploadZone({ onAnalyzed, onError }: UploadZoneProps) {
         setProgress(0);
       }
     },
-    [onAnalyzed, onError]
+    [onAnalyzed, onError, selectedCardId]
   );
 
   const handleFile = useCallback(

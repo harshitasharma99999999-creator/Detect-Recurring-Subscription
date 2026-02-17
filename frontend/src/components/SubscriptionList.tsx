@@ -1,11 +1,14 @@
 import { useState, useMemo } from 'react';
-import type { Subscription } from '../types';
+import type { Subscription, Card } from '../types';
 import { api } from '../lib/api';
 import { exportSubscriptionsCsv } from '../lib/api';
+
+const NO_CARD_ID = '00000000-0000-0000-0000-000000000000';
 
 interface SubscriptionListProps {
   subscriptions: Subscription[];
   upcoming: Subscription[];
+  cards: Card[];
   onUpdate: () => void;
 }
 
@@ -15,13 +18,20 @@ const FREQ_LABEL: Record<string, string> = {
   yearly: 'Yearly',
 };
 
-export function SubscriptionList({ subscriptions, upcoming: _upcoming, onUpdate }: SubscriptionListProps) {
+export function SubscriptionList({ subscriptions, upcoming: _upcoming, cards, onUpdate }: SubscriptionListProps) {
   const [search, setSearch] = useState('');
   const [filterFreq, setFilterFreq] = useState<string>('all');
+  const [filterCardId, setFilterCardId] = useState<string>('all');
   const [sort, setSort] = useState<'name' | 'amount' | 'next' | 'monthly'>('next');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [markingId, setMarkingId] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+
+  const cardMap = useMemo(() => {
+    const m = new Map<string, Card>();
+    cards.forEach((c) => m.set(c.id, c));
+    return m;
+  }, [cards]);
 
   const filtered = useMemo(() => {
     let list = [...subscriptions];
@@ -32,12 +42,15 @@ export function SubscriptionList({ subscriptions, upcoming: _upcoming, onUpdate 
     if (filterFreq !== 'all') {
       list = list.filter((s) => s.frequency === filterFreq);
     }
+    if (filterCardId !== 'all') {
+      list = list.filter((s) => (s.card_id || NO_CARD_ID) === filterCardId);
+    }
     if (sort === 'name') list.sort((a, b) => a.merchant_name.localeCompare(b.merchant_name));
     if (sort === 'amount') list.sort((a, b) => b.amount - a.amount);
     if (sort === 'next') list.sort((a, b) => a.next_expected_charge.localeCompare(b.next_expected_charge));
     if (sort === 'monthly') list.sort((a, b) => b.monthly_equivalent - a.monthly_equivalent);
     return list;
-  }, [subscriptions, search, filterFreq, sort]);
+  }, [subscriptions, search, filterFreq, filterCardId, sort]);
 
   const markFalsePositive = async (id: string) => {
     setMarkingId(id);
@@ -83,6 +96,17 @@ export function SubscriptionList({ subscriptions, upcoming: _upcoming, onUpdate 
           className="rounded-lg bg-surface-600 border border-surface-500 px-3 py-2 text-white placeholder-gray-500 w-56 focus:border-accent-blue focus:ring-1 focus:ring-accent-blue outline-none"
         />
         <select
+          value={filterCardId}
+          onChange={(e) => setFilterCardId(e.target.value)}
+          className="rounded-lg bg-surface-600 border border-surface-500 px-3 py-2 text-white focus:border-accent-blue outline-none"
+        >
+          <option value="all">All cards</option>
+          <option value={NO_CARD_ID}>No card</option>
+          {cards.map((c) => (
+            <option key={c.id} value={c.id}>****{c.last_four} {c.nickname || c.cardholder_name}</option>
+          ))}
+        </select>
+        <select
           value={filterFreq}
           onChange={(e) => setFilterFreq(e.target.value)}
           className="rounded-lg bg-surface-600 border border-surface-500 px-3 py-2 text-white focus:border-accent-blue outline-none"
@@ -117,6 +141,7 @@ export function SubscriptionList({ subscriptions, upcoming: _upcoming, onUpdate 
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-surface-600 bg-surface-600/50">
+                <th className="px-4 py-3 text-sm font-medium text-gray-300">Card</th>
                 <th className="px-4 py-3 text-sm font-medium text-gray-300">Merchant</th>
                 <th className="px-4 py-3 text-sm font-medium text-gray-300">Amount</th>
                 <th className="px-4 py-3 text-sm font-medium text-gray-300">Frequency</th>
@@ -126,8 +151,13 @@ export function SubscriptionList({ subscriptions, upcoming: _upcoming, onUpdate 
               </tr>
             </thead>
             <tbody>
-              {filtered.map((s) => (
+              {filtered.map((s) => {
+                const card = s.card_id && s.card_id !== NO_CARD_ID ? cardMap.get(s.card_id) : null;
+                return (
                 <tr key={s.id} className="border-b border-surface-600/80 hover:bg-surface-600/30">
+                  <td className="px-4 py-3 text-gray-400 text-sm">
+                    {card ? `****${card.last_four} ${card.nickname || card.cardholder_name}` : '—'}
+                  </td>
                   <td className="px-4 py-3 font-medium text-white">{s.merchant_name}</td>
                   <td className="px-4 py-3 text-gray-300">${Number(s.amount).toFixed(2)}</td>
                   <td className="px-4 py-3 text-gray-300">{FREQ_LABEL[s.frequency] ?? s.frequency}</td>
@@ -154,7 +184,7 @@ export function SubscriptionList({ subscriptions, upcoming: _upcoming, onUpdate 
                     </div>
                   </td>
                 </tr>
-              ))}
+              );})}
             </tbody>
           </table>
         </div>

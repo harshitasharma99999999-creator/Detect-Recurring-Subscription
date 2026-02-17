@@ -1,6 +1,16 @@
+export interface Card {
+  id: string;
+  user_id: string;
+  last_four: string;
+  cardholder_name: string;
+  nickname: string | null;
+  created_at: string;
+}
+
 export interface Subscription {
   id: string;
   user_id: string;
+  card_id: string | null;
   merchant_name: string;
   normalized_merchant: string;
   amount: number;

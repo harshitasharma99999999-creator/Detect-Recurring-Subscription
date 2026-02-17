@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { authRouter } from './routes/auth.js';
+import { cardsRouter } from './routes/cards.js';
 import { subscriptionsRouter } from './routes/subscriptions.js';
 import { uploadRouter } from './routes/upload.js';
 
@@ -17,6 +18,7 @@ app.use(cors({
 app.use(express.json({ limit: '2mb' }));
 
 app.use('/api/auth', authRouter);
+app.use('/api/cards', cardsRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/upload', uploadRouter);
 
