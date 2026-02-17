@@ -49,8 +49,8 @@ You’ll paste these into Vercel in Part 2 and Part 3. Leave Supabase open; you�
 1. Go to **[vercel.com/new](https://vercel.com/new)** and import your **Git repository** (this repo).
 2. **Root Directory:** click **Edit** → set to **`backend`**.
 3. **Framework Preset:** leave as **Other**.
-4. **Build Command:** leave empty.
-5. **Output Directory:** leave empty.
+4. **Build Command:** leave **empty**.
+5. **Output Directory:** leave **empty** (backend is an API; if you had set it to `public` and the build failed, clear it — an empty `backend/public` folder is also in the repo so the build can pass if your project still expects it).
 6. **Install Command:** `npm install`.
 7. Do **not** deploy yet.
 
@@ -64,7 +64,7 @@ You’ll paste these into Vercel in Part 2 and Part 3. Leave Supabase open; you�
    | `SUPABASE_URL`              | Your Supabase Project URL | Production, Preview |
    | `SUPABASE_ANON_KEY`         | Supabase anon key         | Production, Preview |
    | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service_role key | Production, Preview |
-   | `FRONTEND_URL`              | `https://YOUR-FRONTEND-URL.vercel.app` (replace after Part 3) | Production, Preview |
+   | `` FRONTEND_URL             | `https://YOUR-FRONTEND-URL.vercel.app` (replace after Part 3) | Production, Preview |
 
 3. For **FRONTEND_URL**: you can set a placeholder now (e.g. `https://placeholder.vercel.app`) and update it in **Part 4** after the frontend is deployed.
 
