@@ -147,6 +147,13 @@ You’ll paste these into Vercel in Part 2 and Part 3. Leave Supabase open; you�
 
 The frontend needs three env vars in Vercel (Settings → Environment Variables): **VITE_SUPABASE_URL**, **VITE_SUPABASE_ANON_KEY**, **VITE_API_URL**. If any are missing, add them and **Redeploy** the frontend.
 
+### Login / auth not working
+
+1. **Backend must respond:** Open `https://YOUR-BACKEND-URL/api/health` — you should see `{"ok":true}`. If you see 404, the backend project needs **Root Directory** = `backend` and **Build Command** / **Output Directory** left empty (the repo’s `backend/vercel.json` routes traffic to the Express app).
+2. **Frontend env:** In the **frontend** Vercel project, **VITE_API_URL** must be exactly your backend URL (e.g. `https://detect-backend-xxx.vercel.app`), with no trailing slash.
+3. **Backend env:** In the **backend** Vercel project, **FRONTEND_URL** must be your frontend URL (e.g. `https://detect-recurring-subscription-rmhj.vercel.app`) so CORS allows the browser to call the API.
+4. **Supabase:** In Supabase → **Authentication** → **URL Configuration**, set **Site URL** and **Redirect URLs** to your frontend URL.
+
 ---
 
 ## Local development

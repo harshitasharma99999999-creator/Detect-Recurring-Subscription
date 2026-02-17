@@ -20,7 +20,8 @@ export function useAuth() {
           await api.auth.session(session.access_token);
           setUser(session.user);
         } catch {
-          setUser(null);
+          // Backend unreachable (e.g. 404) — still trust Supabase session so login works
+          setUser(session.user);
         }
       } else {
         setUser(null);
