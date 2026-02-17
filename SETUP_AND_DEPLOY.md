@@ -143,6 +143,10 @@ You’ll paste these into Vercel in Part 2 and Part 3. Leave Supabase open; you�
 2. Click **Sign up** and create an account (use a real email if you left “Confirm email” ON).
 3. After sign-in you should see the dashboard. Upload **`sample-statement.csv`** from this repo to test detection.
 
+### App shows a black screen or "Configuration required"
+
+The frontend needs three env vars in Vercel (Settings → Environment Variables): **VITE_SUPABASE_URL**, **VITE_SUPABASE_ANON_KEY**, **VITE_API_URL**. If any are missing, add them and **Redeploy** the frontend.
+
 ---
 
 ## Local development

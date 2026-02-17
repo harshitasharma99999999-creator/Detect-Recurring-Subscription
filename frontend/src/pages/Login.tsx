@@ -11,6 +11,7 @@ export function Login() {
 
   const signIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!supabase) return;
     setLoading(true);
     setMessage(null);
     try {
@@ -26,6 +27,7 @@ export function Login() {
 
   const signUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!supabase) return;
     setLoading(true);
     setMessage(null);
     try {

@@ -5,7 +5,7 @@ export function Layout() {
   const navigate = useNavigate();
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    if (supabase) await supabase.auth.signOut();
     navigate('/login');
   };
 

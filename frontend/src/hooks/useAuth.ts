@@ -8,8 +8,13 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const client = supabase;
+    if (!client) {
+      setLoading(false);
+      return;
+    }
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session } } = await client.auth.getSession();
       if (session?.user) {
         try {
           await api.auth.session(session.access_token);
@@ -25,7 +30,7 @@ export function useAuth() {
 
     init();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
