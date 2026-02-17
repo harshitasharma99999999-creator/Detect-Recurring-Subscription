@@ -128,9 +128,14 @@ You’ll paste these into Vercel in Part 2 and Part 3. Leave Supabase open; you�
 
 ## Part 5: Done
 
-- **Frontend:** `https://your-frontend.vercel.app` — sign up, sign in, upload CSV.
-- **API:** `https://your-backend.vercel.app/api/health` (and other `/api/*` routes).
+- **Frontend:** `https://your-frontend.vercel.app` — sign up, sign in, upload CSV. **This is the app users open.**
+- **API:** `https://your-backend.vercel.app` — shows a short message at `/`; use `/api/health`, `/api/auth`, etc. for the API.
 - **Supabase:** Auth (email/password) and database are connected; sessions and subscriptions are stored per user.
+
+### Which URL do I open to use the app?
+
+- **Open the FRONTEND project URL** (the one whose Root Directory is **`frontend`**). That’s where the login and dashboard live.
+- The **backend** project URL (Root = **`backend`**) is only for API calls. Visiting it in the browser shows a short “API” message, not the app. If you only have one Vercel project and it’s the backend, create a **second** project with Root = **`frontend`** and use that second project’s URL as your app.
 
 ### Quick test
 

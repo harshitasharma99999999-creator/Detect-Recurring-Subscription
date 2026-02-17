@@ -15,6 +15,9 @@ app.use('/api/auth', authRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/upload', uploadRouter);
 
+app.get('/', (_req, res) => {
+  res.json({ message: 'Subscription Tracker API', docs: 'Use /api/health, /api/auth, /api/upload, /api/subscriptions' });
+});
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
 });
