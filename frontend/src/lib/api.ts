@@ -1,12 +1,12 @@
 import { supabase } from './supabase';
 
-const API = import.meta.env.VITE_API_URL ?? '';
-
 async function getToken(): Promise<string | null> {
   if (!supabase) return null;
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? null;
 }
+
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
 export async function apiFetch(path: string, opts: RequestInit = {}) {
   const token = await getToken();
@@ -16,7 +16,19 @@ export async function apiFetch(path: string, opts: RequestInit = {}) {
   };
   if (token) (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${API}${path}`, { ...opts, headers });
+  const url = API_BASE ? `${API_BASE}${path}` : path;
+  let res: Response;
+  try {
+    res = await fetch(url, { ...opts, headers });
+  } catch (e) {
+    const msg = (e as Error).message || '';
+    if (msg.includes('fetch') || msg.includes('NetworkError') || msg.includes('Failed to fetch')) {
+      throw new Error(
+        'Cannot reach the API. Set VITE_API_URL to your backend URL (e.g. https://detect-backend-xxx.vercel.app) in the frontend project\'s env vars and redeploy.'
+      );
+    }
+    throw e;
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || res.statusText);
@@ -37,7 +49,7 @@ export const api = {
   },
   auth: {
     session: (accessToken: string) =>
-      fetch(`${API}/api/auth/session`, {
+      fetch(`${API_BASE || ''}/api/auth/session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ access_token: accessToken }),
@@ -55,14 +67,14 @@ export const api = {
     upcoming: () => apiFetch('/api/subscriptions/upcoming'),
     markFalsePositive: (id: string) => apiFetch(`/api/subscriptions/${id}/false-positive`, { method: 'PATCH' }),
     delete: (id: string) => apiFetch(`/api/subscriptions/${id}`, { method: 'DELETE' }),
-    exportCsv: () => `${API}/api/subscriptions/export?token=${encodeURIComponent('')}`,
+    exportCsv: () => (API_BASE ? `${API_BASE}/api/subscriptions/export` : '/api/subscriptions/export'),
   },
 };
 
 export async function exportSubscriptionsCsv() {
   const token = await getToken();
   if (!token) throw new Error('Not logged in');
-  const url = `${API}/api/subscriptions/export`;
+  const url = API_BASE ? `${API_BASE}/api/subscriptions/export` : '/api/subscriptions/export';
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error('Export failed');
   const blob = await res.blob();

@@ -38,7 +38,12 @@ export function CardsSection({ cards, onUpdate, selectedCardId, onSelectCard }: 
       setNickname('');
       onUpdate();
     } catch (err) {
-      setError((err as Error).message);
+      const message = (err as Error).message;
+      setError(
+        message.includes('Cannot reach the API')
+          ? 'Cannot reach the API. In Vercel → Frontend project → Settings → Environment Variables, set VITE_API_URL to your backend URL (e.g. https://detect-backend-xxx.vercel.app), then redeploy.'
+          : message
+      );
     } finally {
       setLoading(false);
     }
