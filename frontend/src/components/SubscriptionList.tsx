@@ -15,7 +15,7 @@ const FREQ_LABEL: Record<string, string> = {
   yearly: 'Yearly',
 };
 
-export function SubscriptionList({ subscriptions, upcoming, onUpdate }: SubscriptionListProps) {
+export function SubscriptionList({ subscriptions, upcoming: _upcoming, onUpdate }: SubscriptionListProps) {
   const [search, setSearch] = useState('');
   const [filterFreq, setFilterFreq] = useState<string>('all');
   const [sort, setSort] = useState<'name' | 'amount' | 'next' | 'monthly'>('next');
